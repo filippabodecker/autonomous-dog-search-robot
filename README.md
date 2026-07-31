@@ -134,7 +134,7 @@ The system architecture above shows how the subsystems are connected. The sequen
 
 ## Hardware
 
-The prototype is built from commercially available embedded and robotics components, combined with a custom treat-dispensing mechanism.
+The prototype combines off-the-shelf robotics components with a custom treat dispenser.
 
 | Component | Exact Model | Purpose |
 |---|---|---|
