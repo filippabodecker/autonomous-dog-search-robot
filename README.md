@@ -153,8 +153,6 @@ For exact part numbers, quantities, wiring and product references, see the [Bill
 
 ## Software
 
-## Software
-
 The software is written in C++ and divided between two embedded controllers. The UNIHIKER K10 runs the robot’s main application, while a separate ESP32 handles image transfer and Telegram communication.
 
 ### Software Components
@@ -172,7 +170,7 @@ The software is written in C++ and divided between two embedded controllers. The
 | Local storage | SD card and LittleFS | Stores images on the K10 and temporarily stores transferred images on the ESP32 |
 | Communication | I²C, UART, Wi-Fi, HTTP and HTTPS | Transfers sensor data, movement commands, mission events and images |
 
-### Application Structure
+### Application Structure 
 
 The source code is divided into two applications:
 
@@ -188,67 +186,83 @@ src/
 ```
 ---
 
-## Engineering Process
+## Engineering Challenges and Design Decisions
 
-### Robot Platform
+The final architecture was shaped by challenges that appeared when the individual subsystems were combined. The most important decisions involved separating AI from network communication, running navigation and AI in parallel, converting LiDAR measurements into useful movement and coordinating the complete dog-detection response.
 
-- Assembly
-- Motor control
-- K10–Maqueen communication
+### 1. Separating AI and Network Communication
 
-### Autonomous Navigation
+**Challenge:**  
+The K10 AI application and the Telegram communication program both worked correctly on their own. However, combining them in a single Mind+ project caused linker errors involving duplicate definitions of `SPIFFS`, `lv_qrcode`, `qrcodegen` and the ESP32 `RMT` driver.
 
-- Navigation algorithm
-- Obstacle avoidance
-- Turning strategy
-- Decision making
+**Root cause:**  
+After several attempts to isolate the problem, DFRobot support confirmed that it was caused by an architectural limitation in the Mind+ `AIRecognition` library. The library already includes several ESP32 system components that conflict with components used by the Wi-Fi and HTTPS libraries. The problem was therefore not caused by the application logic.
 
-### LiDAR Integration
+**Design decision:**  
+Instead of removing either AI or Telegram communication, the software was divided between two controllers:
 
-- Sensor communication
-- Distance measurements
-- Environment scanning
-- Navigation input
+- The UNIHIKER K10 handles AI, navigation and mission control.
+- A separate ESP32 handles Wi-Fi, HTTPS and Telegram communication.
 
-### AI Dog Detection
+Short mission events, such as detection counts and mission status, are sent from the K10 to the ESP32 over UART. Larger BMP image files are transferred separately over Wi-Fi using HTTP.
 
-- Camera testing
-- On-device AI
-- Detection accuracy
-- Lighting conditions
-- Testing methodology
+**Result:**  
+The two-controller design resolved the library conflicts while preserving both on-device AI and Telegram reporting. It also gave each controller a clear role.
 
-### System Integration
+### 2. Running Navigation and AI in Parallel
 
-- Combining all subsystems
-- Full search sequence
-- Debugging
-- Problems encountered
-- Solutions implemented
+**Challenge:**  
+The robot must continuously process camera input for dog detection while also reading LiDAR data and reacting to obstacles. Running these tasks only as one sequential program could make navigation less responsive while the AI and mission logic were active.
+
+**Design decision:**  
+The workload was divided between the K10’s two processor cores using FreeRTOS:
+
+- **Core 0** runs a dedicated LiDAR sensing and navigation task.
+- **Core 1** runs dog detection, voice recognition, image handling and mission logic.
+
+Shared navigation states allow the AI logic to pause the motors immediately when a possible dog is detected and resume the search when the detection sequence is complete.
+
+**Result:**  
+Navigation and AI run in parallel and coordinate through shared navigation states. This keeps obstacle avoidance responsive while the camera is continuously analyzed for dogs.
+
+### 3. Turning LiDAR Measurements into Navigation
+
+**Challenge:**  
+The Matrix LiDAR provides left, center and right distance measurements, but the raw values do not directly tell the robot how fast to move or which direction to choose.
+
+**Design decision:**  
+A rule-based navigation strategy was developed around the three measurements:
+
+- The robot adjusts its speed according to the available distance ahead.
+- Small steering corrections begin before an obstacle becomes critical.
+- When an obstacle is too close, the robot stops, reverses and turns toward the side with more available space.
+- Repeated obstacles trigger progressively larger turns.
+- A predefined search pattern introduces periodic direction changes to support exploration beyond simple obstacle avoidance.
+
+**Result:**  
+The robot can navigate and search an indoor environment without manual control, adapting its speed and direction to nearby obstacles. The system is intentionally reactive: it uses current LiDAR measurements rather than mapping, localization or SLAM.
+
+### 4. Coordinating Dog Detection and Mission State
+
+**Challenge:**  
+A momentary AI result should not immediately trigger the full response sequence. The robot also has to stop safely, record the detection and prevent overlapping actions while the image, treat dispenser and user feedback are being handled.
+
+**Design decision:**  
+A possible dog must remain visible for a short confirmation period and meet a minimum image-size requirement. Navigation pauses as soon as a possible dog appears. After confirmation, the program uses shared mission states to coordinate stopping, image capture, detection counting, LED feedback, treat dispensing and Telegram reporting.
+
+The robot returns to live camera mode after displaying the captured image. If no dog remains visible, navigation resumes. If a dog is still detected, navigation pauses again.
+
+**Result:**  
+The detection response follows one coordinated sequence, allowing navigation, image capture, storage, treat dispensing and communication to work together without conflicting actions.
+
 
 ---
 
-## Results & Evaluation
-
-- Project photos
-- Demonstration video
-- Test scenarios
-- Successful functions
-- Current limitations
-- Performance evaluation
-
----
-
-## What You'll Find in This Repository
-
-- Complete source code
-- Hardware documentation
-- System architecture
-- Development process
-- Engineering challenges
-- Testing methodology
-- Technical report
-- Photos and demonstration videos
+## Results and Evaluation
+### Implemented Results
+### Testing
+### Current Limitations
+### Future Work
 
 ---
 
@@ -265,18 +279,6 @@ autonomous-dog-search-robot/
 ├── report/       Technical report
 └── README.md
 ```
-
----
-
-## Next Steps
-
-- Improve localization
-- Explore SLAM-based navigation
-- Add room mapping
-- Improve AI detection robustness
-- Implement treat dispenser
-- Log search missions
-- Send detection notifications
 
 ---
 
