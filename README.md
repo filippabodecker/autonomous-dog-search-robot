@@ -153,13 +153,31 @@ For exact part numbers, quantities, wiring and product references, see the [Bill
 
 ## Software
 
-- Arduino IDE
-- C++
-- On-device AI
-- Computer Vision
-- Autonomous Navigation
-- I²C Communication
-- Git & GitHub
+The software is written in C++ and divided between two embedded controllers. The UNIHIKER K10 runs the robot’s main application, while a separate ESP32 handles external communication with Telegram.
+
+The K10 application was developed and uploaded using Mind+. The ESP32 communication program was developed in Arduino IDE.
+
+### Software Components
+
+| Area | Technology | Role in the System |
+|---|---|---|
+| Programming language | C++ | Runs the software on both the K10 and the external ESP32 |
+| K10 development environment | Mind+ | Used to write and upload the main robot program |
+| ESP32 development environment | Arduino IDE | Used to write and upload the Telegram program |
+| Task management | FreeRTOS | Lets navigation run at the same time as AI and mission control |
+| On-device AI | DFRobot AIRecognition library | Analyzes the live camera image to detect dogs |
+| Voice recognition | DFRobot ASR library | Recognizes the command that ends the mission |
+| Robot control | DFRobot Maqueen Plus library | Controls the motors and RGB LEDs |
+| Distance sensing | DFRobot Matrix LiDAR library | Reads distance values from the left, center and right |
+| Local storage | SD card and LittleFS | Stores images on the K10 and temporarily on the ESP32 |
+| Communication | I²C, UART, Wi-Fi, HTTP and HTTPS | Transfers sensor data, commands, messages and images between the system components |
+
+### Application Structure
+
+- **UNIHIKER K10 application:** Handles LiDAR navigation, camera-based dog detection, motor commands, voice recognition, image capture, display and audio feedback, servo control and overall mission logic.
+- **ESP32 communication gateway:** Receives mission events over UART, receives images over Wi-Fi using HTTP and forwards messages and images to Telegram using HTTPS.
+
+The complete implementation is available in the [`src/`](src/) directory.
 
 ---
 
