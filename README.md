@@ -259,43 +259,61 @@ The detection response follows one coordinated sequence, allowing navigation, im
 ---
 
 ## Results and Evaluation
+
 ### Implemented Results
-### Testing
+
+The final prototype integrates navigation, dog detection and mission reporting into one autonomous search sequence.
+
+| Function | Result |
+|---|---|
+| Autonomous search | The robot follows a predefined search pattern and moves without manual control |
+| Obstacle avoidance | LiDAR measurements are used to adjust speed and direction around nearby obstacles |
+| Dog detection | On-device AI analyzes live camera input and detects dogs |
+| Detection response | A confirmed detection stops navigation and starts the complete response sequence |
+| Image handling | Numbered BMP images are saved to the SD card and displayed on the K10 |
+| Treat dispensing | The servo releases a treat after a confirmed detection |
+| Detection reporting | The ESP32 sends numbered Telegram notifications during the mission |
+| Mission completion | A voice command stops the robot and triggers the final detection count, audio message and image transfer |
+
+### Testing !!!!!!!!!!!!!!!!!!
+
+The prototype was evaluated through subsystem tests and complete mission trials in controlled indoor environments.
+
+| Test Scenario | What Was Evaluated | Result |
+|---|---|---|
+| Open-space navigation | Search pattern and autonomous movement | [Add observation] |
+| Obstacle avoidance | LiDAR response, speed adjustment, reversing and turning | [Add observation] |
+| Dog detection | Detection at different distances and viewing angles | [Add observation] |
+| Complete detection response | Stopping, image capture, counter, LEDs, servo and Telegram notification | [Add observation] |
+| Mission completion | Voice recognition, final count, audio feedback and image transfer | [Add observation] |
+| Full search mission | Coordination between all subsystems from startup to completion | [Add observation] |
+
 ### Current Limitations
+
+- The navigation system is reactive and does not build a map or track the robot’s position.
+- The predefined search pattern does not guarantee complete room coverage.
+- The same dog may be counted more than once if it remains in or reappears in the camera view.
+- Dog detection can be affected by distance, viewing angle and lighting conditions.
+- Telegram reporting requires an available Wi-Fi connection.
+- The current prototype has primarily been evaluated in controlled indoor environments.
+
 ### Future Work
 
----
-
-## Repository Structure
-
-```text
-autonomous-dog-search-robot/
-│
-├── src/          Source code
-├── docs/         Documentation
-├── media/        Images and videos
-├── hardware/     Wiring diagrams and components
-├── tests/        Test programs and results
-├── report/       Technical report
-└── README.md
-```
+- Reduce repeated detections of the same dog.
+- Improve room coverage and reduce repeated search paths.
+- Test dog detection at more distances, angles and lighting conditions.
+- Improve navigation in narrow and cluttered spaces.
+- Explore localization, room mapping and SLAM.
+- Lägga till något med solcell V2:an ??
 
 ---
+## Project Resources
 
-## Technical Report
-
-This repository includes documentation covering:
-
-- Design process
-- Hardware design
-- Software architecture
-- Engineering decisions
-- Testing
-- Challenges
-- Results
-
-📄 [Add report link]
-
+- [Source code](src/)
+- [Bill of Materials](docs/bill-of-materials.md)
+- [Testing documentation](docs/testing.md)
+- [Technical report](docs/technical-report.pdf)
+- [Project media](media/)
 ---
 
 ## Author
