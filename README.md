@@ -12,7 +12,7 @@ An autonomous search robot built with UNIHIKER K10, Maqueen Plus V3, LiDAR, on-d
 
 ## Project Overview
 
-This project is an autonomous search robot designed to locate dogs in a home environment. Built around the UNIHIKER K10 and Maqueen Plus V3, it integrates LiDAR-based obstacle detection, autonomous navigation, camera-based dog detection using on-device AI, motor control, local image storage and Telegram-based mission reporting.
+This project presents an autonomous indoor search robot designed to locate dogs in a home environment. Built around the UNIHIKER K10 and Maqueen Plus V3, it integrates LiDAR-based obstacle detection, autonomous navigation, camera-based dog detection using on-device AI, motor control, local image storage and Telegram-based mission reporting.
 
 The mission begins at power-on. The K10 continuously analyzes camera input and three directional LiDAR measurements. Together with a predefined search pattern, these inputs determine whether the robot continues forward or turns toward a clearer path. The K10 then sends speed and direction commands to the Maqueen Plus V3, which drives the motors.
 
@@ -67,7 +67,7 @@ A separate ESP32 acts as the communication gateway. It receives detection counts
 ```mermaid
 %%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 40, "rankSpacing": 55}}}%%
 flowchart LR
-    LIDAR["Matrix LiDAR<br/>Left · centre · right"]
+    LIDAR["Matrix LiDAR<br/>Left · center · right"]
 
     subgraph K10["UNIHIKER K10"]
         direction LR
@@ -93,7 +93,7 @@ flowchart LR
     NAV -->|I²C drive| MAQUEEN
     AI -->|I²C stop + LEDs| MAQUEEN
 
-    AI -.->|PWM · planned| SERVO
+    AI -->|PWM via P1| SERVO
 
     classDef sensor fill:#EAF2FF,stroke:#2563EB,stroke-width:1.5px,color:#0F172A
     classDef processing fill:#EEF2FF,stroke:#4F46E5,stroke-width:1.5px,color:#0F172A
@@ -109,17 +109,7 @@ flowchart LR
     linkStyle default stroke:#64748B,stroke-width:1.5px
 ```
 
-### Subsystem Responsibilities
-
-| Subsystem | Main Responsibilities |
-|---|---|
-| UNIHIKER K10 | Processes live camera input, runs on-device dog detection, analyzes LiDAR data, makes navigation decisions and manages the overall mission logic. It also handles voice recognition, display and audio feedback, SD-card file operations, servo control and communication with the external ESP32. |
-| Maqueen Plus V3 | Executes movement commands, drives the motors and provides RGB LED feedback. |
-| Matrix LiDAR | Provides continuous left, middle and right distance measurements for obstacle detection and navigation. |
-| Servo mechanism | Dispenses a treat after a confirmed dog detection, controlled directly by the K10. |
-| SD card | Stores numbered BMP images and the recorded mission-completion audio locally. |
-| External ESP32 | Receives detection counts and mission status over UART, receives BMP images over Wi-Fi using HTTP and forwards messages and images to Telegram. |
-| Telegram | Provides remote dog-detection notifications, the final mission summary and access to the captured images. |
+---
 
 ## Mission Workflow
 
@@ -280,20 +270,7 @@ The detection response follows one coordinated sequence, allowing navigation, im
 
 ## Results and Evaluation
 
-### Implemented Results
-
 The final prototype integrates navigation, dog detection and mission reporting into one autonomous search sequence.
-
-| Function | Result |
-|---|---|
-| Autonomous search | The robot follows a predefined search pattern and moves without manual control |
-| Obstacle avoidance | LiDAR measurements are used to adjust speed and direction around nearby obstacles |
-| Dog detection | On-device AI analyzes live camera input and detects dogs |
-| Detection response | A confirmed detection stops navigation and starts the complete response sequence |
-| Image handling | Numbered BMP images are saved to the SD card and displayed on the K10 |
-| Treat dispensing | The servo releases a treat after a confirmed detection |
-| Detection reporting | The ESP32 sends numbered Telegram notifications during the mission |
-| Mission completion | A voice command stops the robot and triggers the final detection count, audio message and image transfer |
 
 ### Functional Validation
 
@@ -310,7 +287,9 @@ Validation covered LiDAR-based navigation, dog detection, image capture, detecti
 - Telegram reporting requires an available Wi-Fi connection.
 - The current prototype has primarily been evaluated in controlled indoor environments.
 
-### Future Work
+---
+
+## Future Work
 
 - Reduce repeated detections of the same dog.
 - Improve room coverage and reduce repeated search paths.
@@ -320,16 +299,19 @@ Validation covered LiDAR-based navigation, dog detection, image capture, detecti
 - **Long-term integration:** Pair the search robot with a separate solar-tracking robot built on the Maqueen Plus V2 for overnight charging.
 
 ---
+
 ## Project Resources
 
 - [Source code](src/)
 - [Bill of Materials](docs/bill-of-materials.md)
 - [Project media](media/)
+  
 ---
 
 ## Author
 
 **Filippa Bodecker**
 
-MSc Student in Electrical Engineering  
+MSc student in Electrical Engineering  
 Faculty of Engineering (LTH), Lund University
+
