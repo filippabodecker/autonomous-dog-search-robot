@@ -1,9 +1,16 @@
+/*!
+ * Autonomous Dog Search Robot — External ESP32
+ *
+ * Receives mission events from the UNIHIKER K10 over UART, accepts
+ * captured images over Wi-Fi/HTTP and forwards reports and images to Telegram.
+ */
+
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <LittleFS.h>
 #include <WebServer.h>
 
-
+// Public placeholders — keep real credentials out of version control.
 const char* WIFI_SSID = "xx";
 const char* WIFI_PASSWORD = "yy";
 
@@ -19,8 +26,8 @@ const char* CHAT_ID = "yyy";
 // K10 UART
 //-------------------------------------------------
 
-// K10 / Maqueen P0 (P) --> ESP32 GPIO 16 / RX2
-// K10 / Maqueen GND    --> ESP32 GND
+// K10 / Maqueen P0 signal (P) --> ESP32 GPIO 16 (RX2)
+// K10 / Maqueen GND           --> ESP32 GND
 const int K10_RX_PIN = 16;
 
 HardwareSerial k10Serial(2);
@@ -29,7 +36,7 @@ String k10Message = "";
 
 
 //-------------------------------------------------
-// WEBBSERVER OCH BILDER
+// HTTP SERVER AND IMAGE UPLOADS
 //-------------------------------------------------
 
 WebServer server(80);
@@ -47,7 +54,7 @@ String pendingPhotoName = "";
 
 
 //-------------------------------------------------
-// FUNKTIONSDEKLARATIONER
+// FUNCTION DECLARATIONS
 //-------------------------------------------------
 
 void connectWiFi();
@@ -70,7 +77,7 @@ bool sendTelegramDocument(
 
 
 //-------------------------------------------------
-// SETUP
+// SYSTEM INITIALIZATION
 //-------------------------------------------------
 
 void setup() {
@@ -88,7 +95,7 @@ void setup() {
 
 
     //---------------------------------
-    // UART FRÅN K10
+    // UART FROM K10
     //---------------------------------
 
     k10Serial.setRxBufferSize(1024);
@@ -104,7 +111,7 @@ void setup() {
 
 
     //---------------------------------
-    // WIFI-BILDMOTTAGNING
+    // WI-FI IMAGE UPLOADS
     //---------------------------------
 
     server.on(
@@ -144,18 +151,18 @@ void setup() {
 
 
 //-------------------------------------------------
-// LOOP
+// MAIN LOOP
 //-------------------------------------------------
 
 void loop() {
 
-    // Tar emot bilder från K10 via WiFi.
+    // Receive images from the K10 over Wi-Fi.
     server.handleClient();
 
-    // Tar emot DOG_FOUND och MISSION_COMPLETE via P0.
+    // Receive DOG_FOUND and MISSION_COMPLETE events over UART.
     readK10Serial();
 
-    // När en bild har sparats skickas den till Telegram.
+    // Forward each stored image to Telegram.
     if (telegramPending) {
 
         telegramPending = false;
@@ -184,7 +191,7 @@ void loop() {
 
 
 //-------------------------------------------------
-// WIFI
+// WI-FI CONNECTION
 //-------------------------------------------------
 
 void connectWiFi() {
@@ -212,7 +219,7 @@ void connectWiFi() {
 
 
 //-------------------------------------------------
-// LÄS UART-MEDDELANDEN FRÅN K10
+// READ UART MESSAGES FROM K10
 //-------------------------------------------------
 
 void readK10Serial() {
@@ -245,7 +252,7 @@ void readK10Serial() {
 
 
 //-------------------------------------------------
-// HANTERA K10-MEDDELANDE
+// HANDLE K10 MESSAGE
 //-------------------------------------------------
 
 void handleK10Message(String message) {
@@ -253,7 +260,7 @@ void handleK10Message(String message) {
     Serial.print("FROM K10: ");
     Serial.println(message);
 
-    // Endast bekräftelse att K10 startat.
+    // Ignore the K10 startup confirmation.
     if (message == "K10_READY") {
 
         return;
@@ -292,7 +299,7 @@ void handleK10Message(String message) {
 
 
 //-------------------------------------------------
-// TA EMOT BILD FRÅN K10 VIA WIFI
+// RECEIVE IMAGE FROM K10 OVER WI-FI
 //-------------------------------------------------
 
 void handleUpload() {
@@ -308,7 +315,7 @@ void handleUpload() {
         uploadName =
             upload.filename;
 
-        // Säkerställer att filen sparas i LittleFS rot.
+        // Ensure that the file is stored in the LittleFS root directory.
         if (!uploadName.startsWith("/")) {
 
             uploadPath =
@@ -384,7 +391,7 @@ void handleUpload() {
                 upload.totalSize
             );
 
-            // Sparar rätt filnamn, t.ex. dog_002.bmp.
+            // Preserve the received filename, e.g. dog_002.bmp.
             pendingPhotoPath =
                 uploadPath;
 
@@ -398,7 +405,7 @@ void handleUpload() {
 
 
 //-------------------------------------------------
-// GÖR TEXT SÄKER FÖR TELEGRAM-URL
+// URL-ENCODE TELEGRAM TEXT
 //-------------------------------------------------
 
 String urlEncode(const String& text) {
@@ -451,7 +458,7 @@ String urlEncode(const String& text) {
 
 
 //-------------------------------------------------
-// SKICKA VANLIGT TELEGRAM-MEDDELANDE
+// SEND TELEGRAM TEXT MESSAGE
 //-------------------------------------------------
 
 bool sendTelegramText(
@@ -534,7 +541,7 @@ bool sendTelegramText(
 
 
 //-------------------------------------------------
-// SKICKA BILD TILL TELEGRAM
+// SEND IMAGE TO TELEGRAM
 //-------------------------------------------------
 
 bool sendTelegramDocument(
