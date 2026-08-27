@@ -295,18 +295,11 @@ The final prototype integrates navigation, dog detection and mission reporting i
 | Detection reporting | The ESP32 sends numbered Telegram notifications during the mission |
 | Mission completion | A voice command stops the robot and triggers the final detection count, audio message and image transfer |
 
-### Testing !!!!!!!!!!!!!!!!!!
+### Functional Validation
 
-The prototype was evaluated through subsystem tests and complete mission trials in controlled indoor environments.
+The prototype was validated continuously throughout development through subsystem and integration testing. Individual functions were first tested independently and then verified as part of the complete mission workflow.
 
-| Test Scenario | What Was Evaluated | Result |
-|---|---|---|
-| Open-space navigation | Search pattern and autonomous movement | [Add observation] |
-| Obstacle avoidance | LiDAR response, speed adjustment, reversing and turning | [Add observation] |
-| Dog detection | Detection at different distances and viewing angles | [Add observation] |
-| Complete detection response | Stopping, image capture, counter, LEDs, servo and Telegram notification | [Add observation] |
-| Mission completion | Voice recognition, final count, audio feedback and image transfer | [Add observation] |
-| Full search mission | Coordination between all subsystems from startup to completion | [Add observation] |
+Validation covered LiDAR-based navigation, dog detection, image capture, detection tracking, treat dispensing, Telegram reporting and voice-triggered mission completion.
 
 ### Current Limitations
 
@@ -324,15 +317,13 @@ The prototype was evaluated through subsystem tests and complete mission trials 
 - Test dog detection at more distances, angles and lighting conditions.
 - Improve navigation in narrow and cluttered spaces.
 - Explore localization, room mapping and SLAM.
-- Lägga till något med solcell V2:an ??
+- **Long-term integration:** Pair the search robot with a separate solar-tracking robot built on the Maqueen Plus V2 for overnight charging.
 
 ---
 ## Project Resources
 
 - [Source code](src/)
 - [Bill of Materials](docs/bill-of-materials.md)
-- [Testing documentation](docs/testing.md)
-- [Technical report](docs/technical-report.pdf)
 - [Project media](media/)
 ---
 
