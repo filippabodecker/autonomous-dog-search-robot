@@ -2,7 +2,7 @@
 
 [Add hero image]
 
-An autonomous search robot built with UNIHIKER K10, Maqueen Plus V3, LiDAR, on-device AI and computer vision.
+An autonomous indoor search robot built with UNIHIKER K10, Maqueen Plus V3, LiDAR, on-device AI and computer vision.
 
 > *Big ideas don't always start with big problems. Sometimes they start with a dog named Benny.*
 
@@ -12,7 +12,7 @@ An autonomous search robot built with UNIHIKER K10, Maqueen Plus V3, LiDAR, on-d
 
 ## Project Overview
 
-This project presents an autonomous indoor search robot designed to locate dogs in a home environment. Built around the UNIHIKER K10 and Maqueen Plus V3, it integrates LiDAR-based obstacle detection, autonomous navigation, camera-based dog detection using on-device AI, motor control, local image storage and Telegram-based mission reporting.
+This project presents an autonomous search robot designed to locate dogs in a home environment. Built around the UNIHIKER K10 and Maqueen Plus V3, it integrates LiDAR-based obstacle detection, autonomous navigation, camera-based dog detection using on-device AI, motor control, local image storage and Telegram-based mission reporting.
 
 The mission begins at power-on. The K10 continuously analyzes camera input and three directional LiDAR measurements. Together with a predefined search pattern, these inputs determine whether the robot continues forward or turns toward a clearer path. The K10 then sends speed and direction commands to the Maqueen Plus V3, which drives the motors.
 
@@ -52,6 +52,7 @@ Now the robot is here — ready to find Benny.
 - **Treat dispensing:** Activates an integrated servo-controlled mechanism after a successful dog detection.
 - **Telegram reporting:** Sends numbered detection notifications during the mission and transmits the final detection count and captured images when the search ends.
 - **Voice-triggered mission completion:** Ends the autonomous search when the command “Hi, Telly, mission complete” is recognized.
+
 ---
 
 ## System Architecture
@@ -158,7 +159,7 @@ The prototype combines off-the-shelf robotics components with a custom treat dis
 | ESP32 power supply | USB power bank | Powers the external ESP32 communication controller |
 | Mechanical parts | Repurposed micro:Maqueen Mechanic parts and custom treat dispenser | Secures the servo and releases a treat after a confirmed detection |
 
-For exact part numbers, quantities, wiring and product references, see the [Bill of Materials](docs/bill-of-materials.md).
+For component quantities, model specifications and product references, see the [Bill of Materials](docs/bill-of-materials.md).
 
 ---
 
@@ -182,7 +183,6 @@ The software is written in C++ and divided between two embedded controllers. The
 | Communication | I²C, UART, Wi-Fi, HTTP and HTTPS | Transfers sensor data, movement commands, mission events and images |
 
 ### Application Structure 
-
 The source code is divided into two applications:
 
 - **[UNIHIKER K10 application](src/k10/):** Main robot software
@@ -269,7 +269,7 @@ The detection response follows one coordinated sequence, allowing navigation, im
 
 ---
 
-## Results and Evaluation
+## Results and Validation
 
 The final prototype integrates navigation, dog detection and mission reporting into one autonomous search sequence.
 
@@ -306,7 +306,7 @@ Validation covered LiDAR-based navigation, dog detection, image capture, detecti
 - [Source code](src/)
 - [Bill of Materials](docs/bill-of-materials.md)
 - [Images and demonstrations](media/)
-  
+
 ---
 
 ## Author
