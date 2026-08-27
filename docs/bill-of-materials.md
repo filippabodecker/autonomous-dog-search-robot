@@ -2,13 +2,14 @@
 
 The main hardware components used in the autonomous dog search robot are listed below.
 
-| Qty | Component | Exact Model | Purpose | Product Reference |
+| Qty | Component | Model / Specification | Purpose | Product Reference |
 |---:|---|---|---|---|
-| 1 | Main controller | UNIHIKER K10 | Runs AI, navigation and mission logic | https://www.dfrobot.com/product-2904.html?srsltid=AfmBOopcsYuXPZwG5lb0kMdE27yz3tdh9FxU_5DmcXR0JHPttqWLBllz |
-| 1 | Robot platform | DFRobot Maqueen Plus V3 | Provides the chassis, motors and RGB LEDs | https://www.dfrobot.com/product-2935.html?srsltid=AfmBOoppUDIvEbCtaDBNh1z88EbgK5-S3QzkRxOIpF3wLgokw1bPe0O3 |
-| 1 | Distance sensor | DFRobot Matrix LiDAR Distance Sensor | Provides left, center and right distance measurements | [Official product page](ADD-LINK) |
-| 1 | Communication controller | *[add exact ESP32 model]* | Handles Telegram communication and image transfer | [Product page](ADD-LINK) |
-| 1 | Servo motor | *[add exact model]* | Operates the treat dispenser | [Product page](ADD-LINK) |
-| 1 | microSD card | *[add capacity and model]* | Stores BMP images and audio | [Product page](ADD-LINK) |
-| 1 | Power supply | *[add exact model]* | Powers the robot system | [Product page](ADD-LINK) |
-| 1 | Mechanical assembly | Custom mounts and treat dispenser | Secures the hardware and releases treats after detection | Custom-built |
+| 1 | Main controller | UNIHIKER K10 (DFR0992-EN) | Runs AI, navigation, voice recognition and mission logic | [DFRobot product page](https://www.dfrobot.com/product-2904.html) |
+| 1 | Robot platform | DFRobot Maqueen Plus V3 (MBT0050-18650) | Provides the chassis, motors, wheels and RGB LED feedback | [DFRobot product page](https://www.dfrobot.com/product-2939.html) |
+| 1 | Distance sensor | DFRobot Matrix Laser Ranging Sensor, included with MBT0050-18650 | Provides left, center and right distance measurements | [Included with Maqueen Plus V3](https://www.dfrobot.com/product-2939.html) |
+| 1 | Communication controller | DUBEUYEW ESP32-DevKitC V1 (30-pin) | Handles Telegram communication and image transfer | [Amazon product page](https://www.amazon.se/dp/B0CRRFT5L7) |
+| 1 | Servo motor | DFRobot 9g Metal Gear Servo, from micro:Maqueen Mechanic – Beetle (ROB0156-B) | Operates the treat-dispensing mechanism | [DFRobot product page](https://www.dfrobot.com/product-2128.html) |
+| 1 | Storage | 32 GB microSD card | Stores numbered BMP images and the recorded completion message | — |
+| 1 | Robot power supply | Rechargeable 18650 Li-ion battery | Powers the Maqueen Plus V3 and main robot system | — |
+| 1 | ESP32 power supply | USB power bank | Powers the external ESP32 communication controller | — |
+| 1 | Mechanical assembly | Repurposed micro:Maqueen Mechanic parts and custom treat dispenser | Secures the servo and releases a treat after a confirmed detection | [Mechanic kit](https://www.dfrobot.com/product-2029.html) and custom-built parts |
