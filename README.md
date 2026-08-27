@@ -31,7 +31,7 @@ The mission is simple: find a missing dog. The engineering is not. This project 
 
 Autonomous cars, search-and-rescue drones and planetary rovers operate on a much larger scale, but they rely on the same fundamentals: perception, navigation and intelligent decision-making. Their environments may be city streets, disaster zones or the surface of Mars. Mine is a living room. I wanted to explore those principles by scaling the challenge down to something small, real and close to home.
 
-That is where Benny comes in.
+That is where Benny the dog comes in.
 
 Finding him somewhere in the house, possibly under the sofa, turned a collection of sensors, algorithms and hardware into an integrated autonomous prototype. Every part had to work toward one clear goal.
 
