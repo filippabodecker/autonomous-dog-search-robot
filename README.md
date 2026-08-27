@@ -114,7 +114,7 @@ The system architecture above shows how the subsystems are connected. The sequen
 
 ### 2. Dog Detection and Response
 
-- When the on-device AI identifies a possible dog, navigation pauses while the detection is briefly confirmed.
+- When the on-device AI identifies a possible dog, navigation pauses while the detection is confirmed.
 - After confirmation, the robot stops, activates the Maqueen LEDs and increments the detection counter.
 - A numbered BMP image is captured and saved to the SD card.
 - The K10 sends the numbered detection event to the external ESP32, which forwards a Telegram notification.
