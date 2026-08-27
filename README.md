@@ -146,7 +146,7 @@ The system architecture above shows how the subsystems are connected. The sequen
 
 The prototype combines off-the-shelf robotics components with a custom treat dispenser.
 
-| Component | Exact Model | Purpose |
+| Component | Model / Specification | Purpose |
 |---|---|---|
 | Main controller | UNIHIKER K10 | Runs camera processing, on-device AI, LiDAR navigation, voice recognition and mission logic |
 | Robot platform | DFRobot Maqueen Plus V3 (MBT0050-18650) | Provides the chassis, motors, wheels and RGB LED feedback |
@@ -154,7 +154,8 @@ The prototype combines off-the-shelf robotics components with a custom treat dis
 | Communication controller | DUBEUYEW ESP32-DevKitC V1 (30-pin) | Handles Telegram notifications, mission reporting and image transmission |
 | Servo motor | DFRobot 9g Metal Gear Servo (micro:Maqueen Mechanic kit) | Operates the treat-dispensing mechanism |
 | Storage | 32 GB microSD card | Stores numbered BMP images and the recorded completion message |
-| Power supply | 1 × rechargeable 18650 Li-ion battery | Powers the mobile robot system |
+| Robot power supply | 1 × rechargeable 18650 Li-ion battery | Powers the Maqueen Plus V3 and main robot system |
+| ESP32 power supply | USB power bank | Powers the external ESP32 communication controller |
 | Mechanical parts | Repurposed micro:Maqueen Mechanic parts and custom treat dispenser | Secures the servo and releases a treat after a confirmed detection |
 
 For exact part numbers, quantities, wiring and product references, see the [Bill of Materials](docs/bill-of-materials.md).
