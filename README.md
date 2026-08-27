@@ -2,7 +2,7 @@
 
 [Add hero image]
 
-An autonomous indoor search robot built with UNIHIKER K10, Maqueen Plus V3, LiDAR, on-device AI and computer vision.
+An autonomous indoor search robot built on the UNIHIKER K10 and Maqueen Plus V3, combining LiDAR-based navigation, on-device dog detection and Telegram mission reporting.
 
 > *Big ideas don't always start with big problems. Sometimes they start with a dog named Benny.*
 
