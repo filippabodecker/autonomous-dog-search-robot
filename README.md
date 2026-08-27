@@ -151,7 +151,7 @@ The prototype combines off-the-shelf robotics components with a custom treat dis
 | Main controller | UNIHIKER K10 | Runs camera processing, on-device AI, LiDAR navigation, voice recognition and mission logic |
 | Robot platform | DFRobot Maqueen Plus V3 | Provides the chassis, motors, wheels and RGB LED feedback |
 | Distance sensor | DFRobot Matrix LiDAR Distance Sensor | Provides left, center and right distance measurements for navigation and obstacle avoidance |
-| Communication controller | ESP32 development board *[add exact model]* | Handles Telegram notifications, mission reporting and image transmission |
+| Communication controller | DUBEUYEW ESP32-DevKitC V1 (30-pin) | Handles Telegram notifications, mission reporting and image transmission |
 | Servo motor | *[add exact model]* | Operates the treat-dispensing mechanism |
 | Storage | microSD card *[add capacity]* | Stores numbered BMP images and the recorded completion message |
 | Power supply | *[add exact battery or battery pack]* | Powers the mobile robot system |
@@ -304,7 +304,7 @@ Validation covered LiDAR-based navigation, dog detection, image capture, detecti
 
 - [Source code](src/)
 - [Bill of Materials](docs/bill-of-materials.md)
-- [Project media](media/)
+- [Images and demonstrations](media/)
   
 ---
 
