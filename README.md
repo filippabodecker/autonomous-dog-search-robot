@@ -64,29 +64,49 @@ The K10 sends speed and direction commands to the Maqueen Plus V3, which drives 
 
 A separate ESP32 acts as the communication gateway. It receives detection counts and mission status from the K10 over UART, receives stored images over Wi-Fi using HTTP and forwards the notifications, mission summary and images to Telegram.
 
-
 ```mermaid
-flowchart TB
-    LiDAR[Matrix LiDAR<br/>Left, middle and right distances] --> NAV
+%%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 40, "rankSpacing": 55}}}%%
+flowchart LR
+    LIDAR["Matrix LiDAR<br/>Left · centre · right"]
 
     subgraph K10["UNIHIKER K10"]
         direction LR
 
-        NAV[Core 0<br/>LiDAR sensing and navigation]
-        AI[Main loop / Core 1<br/>Dog detection, voice recognition and mission logic]
-        LOCAL[Display, speaker and SD card]
+        NAV["Core 0<br/>LiDAR sensing<br/>and navigation"]
 
-        NAV <-->|Shared navigation state| AI
-        AI -->|Local feedback and image storage| LOCAL
+        AI["Core 1 / main loop<br/>Dog detection · voice<br/>and mission logic"]
+
+        NAV <-->|Shared state| AI
     end
 
-    NAV -->|Speed and direction commands| Maqueen[Maqueen Plus V3<br/>Motors and RGB LEDs]
-    AI -->|Stop and LED commands| Maqueen
+    ESP["External ESP32<br/>Communication gateway"]
+    TELEGRAM["Telegram"]
 
-    AI -->|PWM through P1| Servo[Treat-dispensing servo]
+    MAQUEEN["Maqueen Plus V3<br/>Motors · RGB LEDs"]
+    SERVO["Treat dispenser<br/>Servo"]
 
-    AI -->|UART: counts and status<br/>Wi-Fi/HTTP: BMP images| ESP32[External ESP32]
-    ESP32 -->|Telegram Bot API| Telegram[Telegram]
+    LIDAR -->|Distances| NAV
+
+    AI -->|UART + HTTP| ESP
+    ESP -->|Bot API| TELEGRAM
+
+    NAV -->|I²C drive| MAQUEEN
+    AI -->|I²C stop + LEDs| MAQUEEN
+
+    AI -.->|PWM · planned| SERVO
+
+    classDef sensor fill:#EAF2FF,stroke:#2563EB,stroke-width:1.5px,color:#0F172A
+    classDef processing fill:#EEF2FF,stroke:#4F46E5,stroke-width:1.5px,color:#0F172A
+    classDef hardware fill:#ECFDF5,stroke:#059669,stroke-width:1.5px,color:#0F172A
+    classDef communication fill:#FFF7ED,stroke:#EA580C,stroke-width:1.5px,color:#0F172A
+
+    class LIDAR sensor
+    class NAV,AI processing
+    class MAQUEEN,SERVO hardware
+    class ESP,TELEGRAM communication
+
+    style K10 fill:#F8FAFC,stroke:#64748B,stroke-width:1.5px,color:#0F172A
+    linkStyle default stroke:#64748B,stroke-width:1.5px
 ```
 
 ### Subsystem Responsibilities
