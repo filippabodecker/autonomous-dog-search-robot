@@ -1,11 +1,9 @@
 /*!
- * MindPlus
- * esp32s3bit
+ * Autonomous Dog Search Robot — UNIHIKER K10
  *
- * Hunddetektering + foto + servoarm + LiDAR på egen CPU-kärna
- * + ESP32 / Telegram
- * + röstkommando: Mission complete
- * + inspelad avslutsfras
+ * Main firmware for dog detection, image capture, LiDAR navigation,
+ * voice-controlled mission completion, treat dispensing and communication
+ * with the external ESP32.
  */
 
 #include "unihiker_k10.h"
@@ -21,7 +19,7 @@
 
 
 //-------------------------------------------------
-// OBJEKT
+// GLOBAL OBJECTS
 //-------------------------------------------------
 
 UNIHIKER_K10 k10;
@@ -36,7 +34,7 @@ DFRobot_matrixLidarDistanceSensor_I2C tof(tofAddress);
 
 
 //-------------------------------------------------
-// WIFI
+// WI-FI CONFIGURATION
 //-------------------------------------------------
 
 const char* ssid = "xx";
@@ -46,19 +44,19 @@ uint8_t screen_dir = 2;
 
 
 //-------------------------------------------------
-// EXTERN ESP32: UART
+// EXTERNAL ESP32: UART
 //-------------------------------------------------
 
-// Maqueens vanliga P0-port:
+// Maqueen P0 connector:
 // GND / 3V3 / P
 //
-// P0 (P) --> ESP32 RX2
-// GND    --> ESP32 GND
+// P0 signal (P) --> ESP32 RX2
+// GND           --> ESP32 GND
 const uint8_t ESP32_TX_PIN = P0;
 
 
 //-------------------------------------------------
-// SERVOARM
+// TREAT-DISPENSING SERVO
 //-------------------------------------------------
 
 const uint8_t SERVO_PIN = P1;
@@ -72,7 +70,7 @@ const unsigned long ARM_CLOSE_TIME = 500;
 
 
 //-------------------------------------------------
-// FOTO OCH HUNDDETEKTERING
+// IMAGE CAPTURE AND DOG DETECTION
 //-------------------------------------------------
 
 bool photoTaken = false;
@@ -88,14 +86,14 @@ const int MIN_DOG_SIZE = 25;
 
 
 //-------------------------------------------------
-// HUNDRÄKNARE
+// DETECTION COUNTER
 //-------------------------------------------------
 
 int dogsFound = 0;
 
 
 //-------------------------------------------------
-// RÖSTSTYRNING
+// VOICE CONTROL
 //-------------------------------------------------
 
 const int CMD_MISSION_COMPLETE = 1;
@@ -104,7 +102,7 @@ bool missionComplete = false;
 
 
 //-------------------------------------------------
-// LIDAR-VARIABLER
+// LIDAR STATE
 //-------------------------------------------------
 
 volatile float distanceMiddle;
@@ -117,7 +115,7 @@ int searchPattern = 0;
 
 
 //-------------------------------------------------
-// DELNING MELLAN CPU-KÄRNOR
+// SHARED STATE BETWEEN CPU CORES
 //-------------------------------------------------
 
 volatile bool navigationPaused = false;
@@ -127,7 +125,7 @@ TaskHandle_t navigationTaskHandle = NULL;
 
 
 //-------------------------------------------------
-// FUNKTIONSDEKLARATIONER
+// FUNCTION DECLARATIONS
 //-------------------------------------------------
 
 void navigationTask(void *parameter);
@@ -151,13 +149,13 @@ void sendMissionCompleteToEsp32();
 
 
 //-------------------------------------------------
-// SETUP
+// SYSTEM INITIALIZATION
 //-------------------------------------------------
 
 void setup() {
 
     //---------------------------------
-    // SERVO: STARTA STÄNGD
+    // INITIALIZE SERVO IN CLOSED POSITION
     //---------------------------------
 
     setupServo();
@@ -173,7 +171,7 @@ void setup() {
 
 
     //---------------------------------
-    // AI OCH KAMERA
+    // AI AND CAMERA
     //---------------------------------
 
     ai.initAi();
@@ -186,7 +184,7 @@ void setup() {
 
 
     //---------------------------------
-    // WIFI
+    // WI-FI CONNECTION
     //---------------------------------
 
     WiFi.mode(WIFI_STA);
@@ -228,14 +226,14 @@ void setup() {
 
 
     //---------------------------------
-    // SD-KORT
+    // SD CARD
     //---------------------------------
 
     k10.initSDFile();
 
 
     //---------------------------------
-    // LIVEKAMERA OCH AI
+    // LIVE CAMERA AND AI
     //---------------------------------
 
     ai.switchAiMode(ai.NoMode);
@@ -246,7 +244,7 @@ void setup() {
 
 
     //---------------------------------
-    // MAQUEEN
+    // MAQUEEN PLUS V3
     //---------------------------------
 
     maqueenPlus.sys_int();
@@ -262,7 +260,7 @@ void setup() {
 
 
     //---------------------------------
-    // LIDAR
+    // MATRIX LIDAR
     //---------------------------------
 
     tof.begin();
@@ -275,7 +273,7 @@ void setup() {
 
 
     //---------------------------------
-    // UART TILL EXTERN ESP32
+    // UART TO EXTERNAL ESP32
     //---------------------------------
 
     Serial1.begin(
@@ -287,9 +285,10 @@ void setup() {
 
     delay(100);
 
-    // Värmer upp UART-länken.
-    // ESP32 visar detta i Serial Monitor,
-    // men skickar ingen Telegram-notis för det.
+    // Warm up the UART link.
+    // The ESP32 prints this message to its Serial Monitor
+    // without sending a Telegram notification.
+    
     Serial1.println(
         "K10_READY"
     );
@@ -298,14 +297,14 @@ void setup() {
 
 
     //---------------------------------
-    // RÖSTIGENKÄNNING
+    // VOICE RECOGNITION
     //---------------------------------
 
     setupVoiceRecognition();
 
 
     //---------------------------------
-    // STARTA LIDAR PÅ KÄRNA 0
+    // START LIDAR TASK ON CORE 0
     //---------------------------------
 
     navigationPaused = false;
@@ -324,13 +323,13 @@ void setup() {
 
 
 //-------------------------------------------------
-// HUVUDLOOP: KÄRNA 1
+// MAIN LOOP: CORE 1
 //-------------------------------------------------
 
 void loop() {
 
     //---------------------------------
-    // RÖSTKOMMANDO: AVSLUTA UPPDRAG
+    // VOICE COMMAND: COMPLETE MISSION
     //---------------------------------
 
     checkMissionCompleteCommand();
@@ -344,7 +343,7 @@ void loop() {
 
 
     //---------------------------------
-    // FOTO VISAS
+    // DISPLAY CAPTURED IMAGE
     //---------------------------------
 
     if (showingPhoto) {
@@ -358,7 +357,7 @@ void loop() {
 
 
     //---------------------------------
-    // LÄS AI-DETEKTERING
+    // READ AI DETECTION
     //---------------------------------
 
     bool dogVisible = ai.isDetectContent(
@@ -380,7 +379,7 @@ void loop() {
 
 
     //---------------------------------
-    // MÖJLIG HUND: STOPPA DIREKT
+    // POTENTIAL DOG: PAUSE NAVIGATION
     //---------------------------------
 
     if (!photoTaken && possibleDog) {
@@ -406,7 +405,7 @@ void loop() {
 
 
     //---------------------------------
-    // FELDETEKTERING: FORTSÄTT SÖKA
+    // UNCONFIRMED DETECTION: RESUME SEARCH
     //---------------------------------
 
     else if (!photoTaken &&
@@ -425,7 +424,7 @@ void loop() {
 
 
 //-------------------------------------------------
-// NAVIGERING: KÄRNA 0
+// NAVIGATION TASK: CORE 0
 //-------------------------------------------------
 
 void navigationTask(void *parameter) {
@@ -464,7 +463,7 @@ void navigationTask(void *parameter) {
 
 
 //-------------------------------------------------
-// UPPDATERA LIDAR
+// UPDATE LIDAR MEASUREMENTS
 //-------------------------------------------------
 
 void updateLidar() {
@@ -480,7 +479,7 @@ void updateLidar() {
 
 
 //-------------------------------------------------
-// ORIGINAL LIDAR-NAVIGERING
+// LIDAR NAVIGATION LOGIC
 //-------------------------------------------------
 
 void runOriginalLidarNavigation() {
@@ -530,12 +529,9 @@ void runOriginalLidarNavigation() {
 
 
     //---------------------------------
-    // PROAKTIV NAVIGERING
+    // PROACTIVE NAVIGATION
     //---------------------------------
    
-        //---------------------------------
-    // PROAKTIV NAVIGERING
-    //---------------------------------
 
     if ((distanceMiddle < 320) &&
         (distanceMiddle > 280)) {
@@ -550,8 +546,8 @@ void runOriginalLidarNavigation() {
             maqueenPlus.Angle_control(25, 0);
         }
 
-        // Vägg nästan rakt fram:
-        // välj den sida som har minst lite mer utrymme.
+        // If a wall is almost directly ahead,
+        // turn toward the side with slightly more free space.    
         else if (distanceLeft >= distanceRight) {
 
             maqueenPlus.Angle_control(-25, 0);
@@ -612,7 +608,7 @@ void runOriginalLidarNavigation() {
     }
 
     //---------------------------------
-    // HINDER UPPTÄCKT
+    // OBSTACLE DETECTED
     //---------------------------------
 
     else if ((distanceMiddle < 250) &&
@@ -710,7 +706,7 @@ void runOriginalLidarNavigation() {
 
 
     //---------------------------------
-    // INGA HINDER: LÅG SÖKHASTIGHET
+    // CLEAR PATH: LOW SEARCH SPEED
     //---------------------------------
 
     else {
@@ -779,7 +775,7 @@ void runOriginalLidarNavigation() {
 
 
 //-------------------------------------------------
-// RÖSTIGENKÄNNING: STARTA
+// INITIALIZE VOICE RECOGNITION
 //-------------------------------------------------
 
 void setupVoiceRecognition() {
@@ -803,7 +799,7 @@ void setupVoiceRecognition() {
 
 
 //-------------------------------------------------
-// RÖSTIGENKÄNNING: KONTROLLERA KOMMANDO
+// CHECK MISSION-COMPLETE COMMAND
 //-------------------------------------------------
 
 void checkMissionCompleteCommand() {
@@ -823,7 +819,7 @@ void checkMissionCompleteCommand() {
 
 
 //-------------------------------------------------
-// AVSLUTA UPPDRAG
+// COMPLETE MISSION
 //-------------------------------------------------
 
 void completeMission() {
@@ -895,7 +891,7 @@ void completeMission() {
 
 
 //-------------------------------------------------
-// HUND UPPTÄCKT
+// HANDLE CONFIRMED DOG DETECTION
 //-------------------------------------------------
 
 void dogDetected() {
@@ -962,7 +958,7 @@ void dogDetected() {
 
 
 //-------------------------------------------------
-// SKICKA HUNDHÄNDELSE TILL ESP32
+// SEND DOG-DETECTION EVENT TO ESP32
 //-------------------------------------------------
 
 void sendDogFoundToEsp32() {
@@ -982,7 +978,7 @@ void sendDogFoundToEsp32() {
 
 
 //-------------------------------------------------
-// SKICKA SLUTRAPPORT TILL ESP32
+// SEND MISSION SUMMARY TO ESP32
 //-------------------------------------------------
 
 void sendMissionCompleteToEsp32() {
@@ -1000,7 +996,7 @@ void sendMissionCompleteToEsp32() {
 
 
 //-------------------------------------------------
-// SERVOARM: ÖPPNA LITE OCH STÄNG IGEN
+// ACTUATE TREAT DISPENSER
 //-------------------------------------------------
 
 void servoArm() {
@@ -1020,7 +1016,7 @@ void servoArm() {
 
 
 //-------------------------------------------------
-// STARTA SERVO STÄNGD
+// INITIALIZE SERVO IN CLOSED POSITION
 //-------------------------------------------------
 
 void setupServo() {
@@ -1049,7 +1045,7 @@ void setupServo() {
 
 
 //-------------------------------------------------
-// ÄNDRA SERVOVINKEL
+// SET SERVO ANGLE
 //-------------------------------------------------
 
 void setServoAngle(int angle) {
@@ -1079,7 +1075,7 @@ void setServoAngle(int angle) {
 
 
 //-------------------------------------------------
-// ÅTERGÅ TILL LIVEKAMERA
+// RETURN TO LIVE CAMERA
 //-------------------------------------------------
 
 void finishPhotoDisplay() {
