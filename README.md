@@ -2,7 +2,7 @@
 
 [Add hero image]
 
-An autonomous indoor search robot built on the UNIHIKER K10 and Maqueen Plus V3, combining LiDAR-based navigation, on-device dog detection and Telegram mission reporting.
+An autonomous indoor search robot built on the UNIHIKER K10 and Maqueen Plus V3 wheeled robot platform,, combining LiDAR-based navigation, on-device dog detection and Telegram mission reporting.
 
 > *Big ideas don't always start with big problems. Sometimes they start with a dog named Benny.*
 
@@ -16,7 +16,7 @@ This project presents an autonomous search robot designed to locate dogs in a ho
 
 The mission begins at power-on. The K10 continuously analyzes camera input and three directional LiDAR measurements. Together with a predefined search pattern, these inputs determine whether the robot continues forward or turns toward a clearer path. The K10 then sends speed and direction commands to the Maqueen Plus V3, which drives the motors.
 
-When a dog is detected, the robot stops, captures and stores an image, activates the Maqueen LEDs and displays both a “Dog detected” message and the captured photo on the K10. It increments the detection counter, dispenses a treat through an integrated servo mechanism and sends a numbered Telegram notification via a separate ESP32 before resuming the search.
+When a dog is detected, the robot stops, captures and stores an image, activates the Maqueen LEDs and displays both a “Dog detected” message and the captured photo on the K10. It increments the detection counter, dispenses a treat for the dog using an integrated servo mechanism and sends a numbered Telegram notification via a separate ESP32 before resuming the search.
 
 The mission ends when the K10 wake phrase is followed by the command “mission complete.” The robot stops, plays an audible completion message, reports the total number of detections and sends all captured images through Telegram.
 
@@ -46,12 +46,13 @@ Now the robot is here — ready to find Benny.
 - **Autonomous search:** Follows a predefined search pattern and navigates without manual control.
 - **LiDAR-based obstacle avoidance:** Continuously analyzes three directional distance measurements to detect obstacles and select a clearer path.
 - **On-device dog detection:** Processes live camera input locally on the UNIHIKER K10 using AI.
+- **Dual-core processing:** Assigns LiDAR navigation and AI processing to separate K10 processor cores, keeping obstacle avoidance responsive while live camera input is analyzed.
 - **Automatic detection response:** Stops, captures an image and stores it on the SD card whenever a dog is detected.
 - **Detection tracking:** Maintains a numbered counter of all dog detections recorded during the mission.
 - **Visual and audible feedback:** Uses the K10 display, Maqueen LEDs and audio messages to communicate mission status.
 - **Treat dispensing:** Activates an integrated servo-controlled mechanism after a successful dog detection.
 - **Telegram reporting:** Sends numbered detection notifications during the mission and transmits the final detection count and captured images when the search ends.
-- **Voice-triggered mission completion:** Ends the autonomous search when the command “Hi, Telly, mission complete” is recognized.
+- **Voice-triggered mission completion:** Ends the autonomous search when the K10’s built-in wake phrase, “Hi, Telly,” is followed by the command “mission complete.”
 
 ---
 
@@ -199,12 +200,12 @@ src/
 
 ## Engineering Challenges and Design Decisions
 
-The final architecture was shaped by challenges that appeared when the individual subsystems were combined. The most important decisions involved separating AI from network communication, running navigation and AI in parallel, converting LiDAR measurements into useful movement and coordinating the complete dog-detection response.
+The final architecture was shaped by challenges that appeared when the individual subsystems were combined. The most important decisions involved separating AI from network communication, running navigation and AI in parallel, converting LiDAR measurements into useful movement, coordinating the complete dog-detection response and adapting the fixed K10 camera to the robot’s mechanical layout.
 
 ### 1. Separating AI and Network Communication
 
 **Challenge:**  
-The K10 AI application and the Telegram communication program both worked correctly on their own. However, combining them in a single Mind+ project caused linker errors involving duplicate definitions of `SPIFFS`, `lv_qrcode`, `qrcodegen` and the ESP32 `RMT` driver.
+The K10 AI application and the Telegram communication program both worked correctly on their own. However, combining them in a single project using Mind+, the development environment used to program the K10, caused linker errors involving duplicate definitions of `SPIFFS`, `lv_qrcode`, `qrcodegen` and the ESP32 `RMT` driver.
 
 **Root cause:**  
 After several attempts to isolate the problem, DFRobot support confirmed that it was caused by an architectural limitation in the Mind+ `AIRecognition` library. The library already includes several ESP32 system components that conflict with components used by the Wi-Fi and HTTPS libraries. The problem was therefore not caused by the application logic.
@@ -266,6 +267,16 @@ The robot returns to live camera mode after displaying the captured image. If no
 **Result:**  
 The detection response follows one coordinated sequence, allowing navigation, image capture, storage, treat dispensing and communication to work together without conflicting actions.
 
+### 5. Adapting the Fixed Camera
+
+**Challenge:**  
+The K10 camera is mounted directly on the controller board and faced the wrong direction in the robot’s final layout.
+
+**Design decision:**  
+I added a camera extension cable and reversed the camera orientation so it could face forward while the K10 remained in its required mounting position. The modification was based on [DFRobot’s K10 camera extension and flipping guide](https://www.digikey.se/en/maker/blogs/2025/unihiker-k10-camera-extension-flipping-guide-for-airobotics-projects).
+
+**Result:**  
+The robot gained a forward-facing camera view without requiring the K10 or the rest of the mechanical layout to be repositioned.
 
 ---
 
@@ -306,6 +317,12 @@ Validation covered LiDAR-based navigation, dog detection, image capture, detecti
 - [Source code](src/)
 - [Bill of Materials](docs/bill-of-materials.md)
 - [Images and demonstrations](media/)
+
+---
+
+## Acknowledgements
+
+Thanks to the DFRobot Support team for their technical guidance during development, particularly for helping identify the Mind+ `AIRecognition` library conflict that led to the final two-controller architecture.
 
 ---
 
