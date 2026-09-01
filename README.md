@@ -1,6 +1,6 @@
 # Autonomous Dog Search Robot
 
-[Add hero image]
+![Autonomous Dog Search Robot](media/hero.jpeg)
 
 An autonomous indoor search robot built with the UNIHIKER K10 controller and the DFRobot Maqueen Plus V3 wheeled robot platform, combining LiDAR-based navigation, on-device dog detection and Telegram mission reporting.
 
