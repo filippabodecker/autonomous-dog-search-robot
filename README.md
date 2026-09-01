@@ -6,7 +6,7 @@ An autonomous indoor search robot built with the UNIHIKER K10 controller and the
 
 > *Big ideas don't always start with big problems. Sometimes they start with a dog named Benny.*
 
-🎥 [Watch the 33-second project demonstration](media/autonomous-dog-search-robot-demo_.mp4?raw=1)
+🎥 [Watch the 33-second project demonstration](https://github.com/filippabodecker/autonomous-dog-search-robot/raw/refs/heads/main/media/autonomous-dog-search-robot-demo_.mp4)
 
 ---
 
